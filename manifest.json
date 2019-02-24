@@ -4,7 +4,7 @@
     "name": "3D Viewer",
     "scope": "/",
     "display": "fullscreen",
-    "start_url": "https://hyakutake1729.github.io/",
+    "start_url": "https://hyakutake1729.github.io/index.html",
     "short_name": "3D Viewer",
     "theme_color": "transparent",
     "description": "",
