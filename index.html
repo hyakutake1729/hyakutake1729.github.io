@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>3D Viewer</title>
+        <link rel="manifest" href="manifest.json"></link>
+        <script src="pwabuilder-sw-register.js"></script>
+        <!-- Babylon.js -->
+        <script src="manup.min.js"></script>
+        <script src="pep.min.js"></script>
+        <script src="dat.gui.min.js"></script>
+        <script src="ammo.js"></script>
+        <script src="cannon.js"></script>
+        <script src="Oimo.js"></script>
+        <script src="gltf_validator.js"></script>
+        <script src="earcut.min.js"></script>
+        <script src="babylon.js"></script>
+        <script src="babylon.inspector.bundle.js"></script>
+        <script src="babylonjs.materials.min.js"></script>
+        <script src="babylonjs.proceduralTextures.min.js"></script>
+        <script src="babylonjs.postProcess.min.js"></script>
+        <script src="babylonjs.loaders.js"></script>
+        <script src="babylonjs.serializers.min.js"></script>
+        <script src="babylon.gui.min.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+        </style>
+    </head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
+            engine.enableOfflineSupport = true;
+
+            var hemi = new BABYLON.HemisphericLight("hemi", BABYLON.Vector3.Up());
+            //Adding a light
+            var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(20, 20, 100), scene);
+            
+            scene.clearColor = new BABYLON.Color3(0.1,0.1,0.1);
+
+            //Adding an Arc Rotate Camera
+            var camera = new BABYLON.ArcRotateCamera("Camera", 0, 1, 50, BABYLON.Vector3.Zero(), scene);
+            camera.attachControl(canvas, true);
+            camera.inertia=0.2;
+            camera.angularSensibilityX=200;
+            camera.angularSensibilityY=200;
+            camera.pinchPrecision=100;
+            camera.lowerRadiusLimit=2;
+            camera.upperRadiusLimit=80;
+            // The first parameter can be used to specify which mesh to import. Here we import all meshes
+            BABYLON.SceneLoader.ImportMesh("", "./", "althouse.glb", scene, function (newMeshes) {
+                // Set the target of the camera to the first imported mesh
+                camera.target = newMeshes[0];
+                var meshes = newMeshes.meshes;
+                //meshes[3].isVisible=false;
+            });
+        
+            // Move the  hemi light with the camera
+            scene.registerBeforeRender(function () {
+                hemi.direction = camera.position;
+                light.position = camera.position;
+            });
+        
+            // GUI
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            var panel = new BABYLON.GUI.StackPanel();
+            panel.width = "220px";
+            panel.fontSize = "14px";
+            panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+            advancedTexture.addControl(panel);
+            
+            var roof = new BABYLON.GUI.Checkbox();
+            roof.width = "20px";
+            roof.height = "20px";
+            roof.isChecked = true;
+            roof.color = "green";
+            var panelForCheckbox = BABYLON.GUI.Control.AddHeader(roof, "Roof", "180px", { isHorizontal: true, controlFirst: true});
+            panelForCheckbox.color = "white";
+            panelForCheckbox.height = "20px";
+            panelForCheckbox.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            panel.addControl(panelForCheckbox);
+        
+            var first = new BABYLON.GUI.Checkbox();
+            first.width = "20px";
+            first.height = "20px";
+            first.isChecked = true;
+            first.color = "green";
+            var panelForCheckbox = BABYLON.GUI.Control.AddHeader(first, "First Floor", "180px", { isHorizontal: true, controlFirst: true});
+            panelForCheckbox.color = "white";
+            panelForCheckbox.height = "20px";
+            panelForCheckbox.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            panel.addControl(panelForCheckbox); 
+            
+            return scene;
+        }
+        
+        
+        var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true });
+        var scene = createScene();
+
+        engine.runRenderLoop(function () {
+            if (scene) {
+                scene.render();
+            }
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
